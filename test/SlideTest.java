@@ -38,6 +38,13 @@ public class SlideTest {
 	}
 	
 	@Test
+	public void random236105478() {
+		Slide slide = new Slide(3, 3, "236105478");
+		
+		assertEquals("RR", slide.random());
+	}
+	
+	@Test
 	public void search() {
 		Slide slide = new Slide(3, 3, "123456078");
 
@@ -60,9 +67,21 @@ public class SlideTest {
 	}
 	
 	@Test
+	public void searcg471620538() {
+		Slide slide = new Slide(3,3,"471620538");
+		assertEquals("LLURRDLDRULLURRDDLLURDR", slide.search());
+	}
+	
+	@Test
+	public void analyze32465871FAC0_9BE() {
+		Slide slide = new Slide(4,4,"32465871FAC0=9BE");
+		assertEquals("DDLLURDR", slide.search());
+	}
+	
+	@Test
 	public void search21597084ACBF__36() {
 		Slide slide = new Slide(4, 4, "21597084ACBF==36");
-		
+		fail();
 		// ê[Ç≥óDêÊÇÃèÍçá
 		assertEquals("DLLURRDLLURRDDLUURDD", slide.search());
 	}

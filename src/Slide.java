@@ -1,19 +1,21 @@
 import java.awt.Window;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 public class Slide {
 
 	private static final char B = '.';
 	
-	public static final int UP = 0;
-	public static final int RIGHT = 1;
-	public static final int LEFT = 2;
-	public static final int DOWN = 3;
+	public static final int U = 0;
+	public static final int R = 1;
+	public static final int L = 2;
+	public static final int D = 3;
 	
 	public char[] C = new char[]{'U','R','L','D'};
 	public int[] F;
 	public int[] M;
+	public int[][] DD;
 	
 	private final String field;
 	private final String answer;
@@ -22,10 +24,18 @@ public class Slide {
 	private final int height;
 	private final String map;
 
+	private final int timeout;
+
 	public Slide(int width, int height, String map) {
+		this(width, height, map, 0);
+	}
+
+	public Slide(int width, int height, String map, int timeout) {
 		this.width = width;
 		this.height = height;
 		this.map = map;
+		this.timeout = timeout;
+		
 		this.field = initField(width, height, map);
 		this.answer = initAnswer(width, height, map);
 		
@@ -33,6 +43,13 @@ public class Slide {
 		F = new int[] { (width + 2) * -1, 1, -1, (width + 2) };
 		// ˆÚ“®‹——£(map—p)
 		M = new int[] { width * -1, 1, -1, width };
+		
+		DD = new int[][]{
+				{U, R, L},
+				{U, R, D},
+				{U, L, D},
+				{R, L, D},
+		};
 	}
 
 	String initAnswer(int width, int height, String map) {
@@ -85,6 +102,43 @@ public class Slide {
 	}
 	
 
+	public String random() {
+		Random random = new Random(map.hashCode());
+		
+		ArrayList<StringBuffer> list = new ArrayList<StringBuffer>();
+
+		int length = valid(width, height, map) / 2;
+		System.out.println(length);
+		while(true){
+			StringBuffer sb = new StringBuffer("44");
+			int temp = random.nextInt(4);
+			sb.append(temp);
+			for(int i = 0; i < length; i++){
+				int c = random.nextInt(3);
+				sb.append(String.valueOf(DD[temp][c]));
+				c = temp;
+			}
+			
+			System.out.println(sb.toString());
+			
+			StringBuffer movedFiled = check(sb);
+			if (movedFiled == null) {
+				continue;
+			}
+			
+			list.add(sb);
+			if (list.size() > 10){
+				break;
+			}
+		}
+		
+		for (StringBuffer sb : list) {
+			System.out.println(sb.toString());
+		}
+		
+		return "";
+	}
+	
 	public String search() {
 		Stack stack = new Stack();
 		stack.push(new StringBuffer("44"));
@@ -92,7 +146,14 @@ public class Slide {
 		int limit = valid(width, height, map) + 2 + startIndex() % 2;
 		int count = 0;
 
+		long start = System.currentTimeMillis();
 		while (true) {
+			if (count % 1000 == 0) {
+				long end = System.currentTimeMillis();
+				if (timeout != 0 && start + timeout < end) {
+					return "" + count;
+				}
+			}
 			StringBuffer node = stack.pop();
 			if (node == null) {
 				node = new StringBuffer("44");
@@ -109,8 +170,8 @@ public class Slide {
 				
 				// ³‰ðH
 				if (answer.equals(movedFiled.toString())) {
-//					return count + "," + format(step);
-					return format(step);
+					return count + "," + format(step);
+//					return format(step);
 				}
 				
 				// Œ»Ý‚Ì[‚³{‰ºŒÀ’l(LowerBound)„¡‰ñ‚Ì[‚³§ŒÀ
@@ -119,7 +180,7 @@ public class Slide {
 					count++;
 				}
 			}
-			System.out.println("---------------" + stack.size());
+//			System.out.println("---------------" + stack.size());
 		}
 	}
 
@@ -181,7 +242,25 @@ public class Slide {
 	}
 
 	public static void main(String[] args) {
-		
+		String[] ss = args[0].split(",");
+		if (ss.length <3) {
+			return;
+		}
+		Slide slide;
+		if (args.length == 2) {
+			slide = new Slide(Integer.parseInt(ss[0]), Integer.parseInt(ss[1]),
+					ss[2], Integer.parseInt(args[1]));
+
+		} else {
+			slide = new Slide(Integer.parseInt(ss[0]), Integer.parseInt(ss[1]),
+					ss[2]);
+
+		}
+		try {
+			System.out.println(slide.search());
+		}catch (Exception e) {
+			System.out.println("x");
+		}
 	}
 
 	public String getField() {
@@ -215,7 +294,7 @@ public class Slide {
 		}
 
 		public void push(StringBuffer sb) {
-			System.out.println(sb.toString());
+//			System.out.println(sb.toString());
 			stack.add(sb);
 		}
 
