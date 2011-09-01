@@ -1,5 +1,6 @@
 import java.awt.Window;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -26,6 +27,8 @@ public class Slide {
 
 	private final int timeout;
 
+	private Integer[] EP;
+
 	public Slide(int width, int height, String map) {
 		this(width, height, map, 0);
 	}
@@ -50,6 +53,16 @@ public class Slide {
 				{U, L, D},
 				{R, L, D},
 		};
+		
+		// イコールの位置
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		for (int i = 0; i < map.length(); i++) {
+			if (map.charAt(i) == '=') {
+				list.add(i);
+			}
+		}
+		EP = list.toArray(new Integer[list.size()]);
+		
 	}
 
 	String initAnswer(int width, int height, String map) {
@@ -107,7 +120,7 @@ public class Slide {
 		
 		ArrayList<StringBuffer> list = new ArrayList<StringBuffer>();
 
-		int length = valid(width, height, map) / 2;
+		int length = valid(map) / 2;
 		System.out.println(length);
 		while(true){
 			StringBuffer sb = new StringBuffer("44");
@@ -143,7 +156,8 @@ public class Slide {
 		Stack stack = new Stack();
 		stack.push(new StringBuffer("44"));
 
-		int limit = valid(width, height, map) + 2 + startIndex() % 2;
+		int limit = valid(map) + 2 + startIndex() % 2;
+		int backupLimit = limit;
 		int count = 0;
 
 		long start = System.currentTimeMillis();
@@ -151,7 +165,8 @@ public class Slide {
 			if (count % 1000 == 0) {
 				long end = System.currentTimeMillis();
 				if (timeout != 0 && start + timeout < end) {
-					return "" + count;
+					return backupLimit + "," + stack.pop().length() + ","
+							+ count + ",";
 				}
 			}
 			StringBuffer node = stack.pop();
@@ -170,12 +185,14 @@ public class Slide {
 				
 				// 正解？
 				if (answer.equals(movedFiled.toString())) {
-					return count + "," + format(step);
+					String format = format(step);
+					return backupLimit + "," + format.length() + "," + count
+							+ "," + format;
 //					return format(step);
 				}
 				
 				// 現在の深さ＋下限値(LowerBound)＞今回の深さ制限
-				if (step.length() + valid(width, height, movedFiled.toString()) < limit) {
+				if (step.length() + valid(movedFiled.toString()) < limit) {
 					stack.push(step);
 					count++;
 				}
@@ -243,7 +260,7 @@ public class Slide {
 
 	public static void main(String[] args) {
 		String[] ss = args[0].split(",");
-		if (ss.length <3) {
+		if (ss.length < 3) {
 			return;
 		}
 		Slide slide;
@@ -258,7 +275,7 @@ public class Slide {
 		}
 		try {
 			System.out.println(slide.search());
-		}catch (Exception e) {
+		} catch (Exception e) {
 			System.out.println("x");
 		}
 	}
@@ -303,12 +320,15 @@ public class Slide {
 		}
 	}
 
-	public static int valid(int width, int height, String map) {
+	public int valid(String map) {
 		int limit = 0;
 		for (int i = 0; i < map.length(); i++) {
 			char c = map.charAt(i);
 			int index = -1;
 			if (c == '0') {
+				continue;
+			}
+			if (c == '=') {
 				continue;
 			}
 			if ('A' <= c) {
@@ -319,6 +339,21 @@ public class Slide {
 			int w = Math.abs(i % width - index % width);
 			int h = Math.abs(i / height - index / height);
 			limit += w + h;
+			
+			// イコールの判定
+			for (int j = 0; j < EP.length; j++) {
+				if (i % width == EP[j] % width
+						&& index % width == EP[j] % width) {
+					if (Math.min(i, index) < EP[j] && EP[j] < Math.max(i, index)) {
+						limit += 2;
+					}
+				} else if (i / width == EP[j] % width
+						&& index / width == EP[j] % width) {
+					if (Math.min(i, index) < EP[j] && EP[j] < Math.max(i, index)) {
+						limit += 2;
+					}
+				}
+			}
 		}
 		return limit;
 	}

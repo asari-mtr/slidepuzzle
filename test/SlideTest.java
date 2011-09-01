@@ -40,7 +40,7 @@ public class SlideTest {
 	@Test
 	public void random236105478() {
 		Slide slide = new Slide(3, 3, "236105478");
-		
+		fail();
 		assertEquals("RR", slide.random());
 	}
 	
@@ -68,34 +68,39 @@ public class SlideTest {
 	
 	@Test
 	public void searcg471620538() {
+		
 		Slide slide = new Slide(3,3,"471620538");
 		assertEquals("LLURRDLDRULLURRDDLLURDR", slide.search());
 	}
 	
 	@Test
-	public void analyze32465871FAC0_9BE() {
-		Slide slide = new Slide(4,4,"32465871FAC0=9BE");
+	public void search32465871FAC0_9BE() {
+		Slide slide = new Slide(4,4,"32465871FAC0=9BE", 30000);
 		assertEquals("DDLLURDR", slide.search());
 	}
 	
 	@Test
 	public void search21597084ACBF__36() {
-		Slide slide = new Slide(4, 4, "21597084ACBF==36");
-		fail();
+		Slide slide = new Slide(4, 4, "21597084ACBF==36", 30000);
 		// [‚³—Dæ‚Ìê‡
 		assertEquals("DLLURRDLLURRDDLUURDD", slide.search());
 	}
 	
 	@Test
 	public void valid() {
-		assertEquals(1, Slide.valid(3,3,"123456708"));
-		assertEquals(2, Slide.valid(3,3,"123456078"));
+		Slide slide = new Slide(3,3,"123456708");
+		assertEquals(1, slide.valid("123456708"));
+		assertEquals(2, slide.valid("123456078"));
+
+		slide = new Slide(3,3,"12045=783");
+		assertEquals(4, slide.valid("12045=783"));
 	}
 	
 	@Test
-	public void vlid840251_63() {
+	public void valid840251_63() {
+		Slide slide = new Slide(3,3,"840251=63");
 		// •—Dæ‚Ìê‡
-		assertEquals(16, Slide.valid(3,3,"840251=63"));
+		assertEquals(14, slide.valid("840251=63"));
 	}
 	
 	@Test
