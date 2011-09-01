@@ -1,5 +1,6 @@
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 
@@ -40,7 +41,6 @@ public class SlideTest {
 	@Test
 	public void random236105478() {
 		Slide slide = new Slide(3, 3, "236105478");
-		fail();
 		assertEquals("RR", slide.random());
 	}
 	
@@ -75,13 +75,13 @@ public class SlideTest {
 	
 	@Test
 	public void search32465871FAC0_9BE() {
-		Slide slide = new Slide(4,4,"32465871FAC0=9BE", 30000);
+		Slide slide = new Slide(4,4,"32465871FAC0=9BE", 120000);
 		assertEquals("DDLLURDR", slide.search());
 	}
 	
 	@Test
 	public void search21597084ACBF__36() {
-		Slide slide = new Slide(4, 4, "21597084ACBF==36", 30000);
+		Slide slide = new Slide(4, 4, "21597084ACBF==36", 120000);
 		// ê[Ç≥óDêÊÇÃèÍçá
 		assertEquals("DLLURRDLLURRDDLUURDD", slide.search());
 	}

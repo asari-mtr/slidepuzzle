@@ -1,6 +1,4 @@
-import java.awt.Window;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 
@@ -27,7 +25,25 @@ public class Slide {
 
 	private final int timeout;
 
-	private Integer[] EP;
+	private final Integer[] EP;
+	private final int[][] RANDOM = new int[][] {
+			{},			// 0000
+			{U},		// 0001
+			{R},		// 0010
+			{U, R},		// 0011
+			{L},		// 0100
+			{L, U}, 	// 0101
+			{L, R},	 	// 0110
+			{L, R, U},	// 0111
+			{D},		// 1000
+			{D, U},		// 1001
+			{D, R},		// 1010
+			{D, U, R},	// 1011
+			{D, L},		// 1100
+			{D, L, U}, 	// 1101
+			{D, L, R},	// 1110
+			{D, L, R, U}// 1111
+	};
 
 	public Slide(int width, int height, String map) {
 		this(width, height, map, 0);
@@ -124,20 +140,29 @@ public class Slide {
 		System.out.println(length);
 		while(true){
 			StringBuffer sb = new StringBuffer("44");
-			int temp = random.nextInt(4);
-			sb.append(temp);
+			int currentIndex = startField(field);
+			int temp = -1;
 			for(int i = 0; i < length; i++){
-				int c = random.nextInt(3);
-				sb.append(String.valueOf(DD[temp][c]));
-				c = temp;
+				int n = 0;
+				for (int j = 0; j < 4; j++) {
+					if (temp == j) {
+						continue;
+					}
+					char c = field.charAt(currentIndex + F[j]);
+					if (c != B) {
+						n += (1 << j);
+					}
+				}
+				int[] r = RANDOM[n];
+				int m = r[random.nextInt(r.length)];
+				temp = 3-m;
+				currentIndex += F[m];
+				sb.append(m);
 			}
 			
-			System.out.println(sb.toString());
+			StringBuffer check = check(sb);
 			
-			StringBuffer movedFiled = check(sb);
-			if (movedFiled == null) {
-				continue;
-			}
+			System.out.println(sb.toString() + "," + valid(check.toString().replace(".", "")));
 			
 			list.add(sb);
 			if (list.size() > 10){
@@ -322,8 +347,14 @@ public class Slide {
 
 	public int valid(String map) {
 		int limit = 0;
+		int b = 0;
 		for (int i = 0; i < map.length(); i++) {
 			char c = map.charAt(i);
+			if (c == B) {
+				b++;
+			}
+			int i2 = i - b;
+			
 			int index = -1;
 			if (c == '0') {
 				continue;
@@ -336,20 +367,20 @@ public class Slide {
 			} else {
 				index += c - '0';
 			}
-			int w = Math.abs(i % width - index % width);
-			int h = Math.abs(i / height - index / height);
+			int w = Math.abs(i2 % width - index % width);
+			int h = Math.abs(i2 / height - index / height);
 			limit += w + h;
 			
 			// ƒCƒR[ƒ‹‚Ì”»’è
 			for (int j = 0; j < EP.length; j++) {
-				if (i % width == EP[j] % width
+				if (i2 % width == EP[j] % width
 						&& index % width == EP[j] % width) {
-					if (Math.min(i, index) < EP[j] && EP[j] < Math.max(i, index)) {
+					if (Math.min(i2, index) < EP[j] && EP[j] < Math.max(i2, index)) {
 						limit += 2;
 					}
-				} else if (i / width == EP[j] % width
+				} else if (i2 / width == EP[j] % width
 						&& index / width == EP[j] % width) {
-					if (Math.min(i, index) < EP[j] && EP[j] < Math.max(i, index)) {
+					if (Math.min(i2, index) < EP[j] && EP[j] < Math.max(i2, index)) {
 						limit += 2;
 					}
 				}
