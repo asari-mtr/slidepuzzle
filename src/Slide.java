@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -131,57 +132,58 @@ public class Slide {
 	}
 	
 
-	public String random() {
-		Random random = new Random(map.hashCode());
-		
-		ArrayList<StringBuffer> list = new ArrayList<StringBuffer>();
-
-		int length = valid(map) / 2;
-		System.out.println(length);
-		while(true){
-			StringBuffer sb = new StringBuffer("44");
-			int currentIndex = startField(field);
-			int temp = -1;
-			for(int i = 0; i < length; i++){
-				int n = 0;
-				for (int j = 0; j < 4; j++) {
-					if (temp == j) {
-						continue;
-					}
-					char c = field.charAt(currentIndex + F[j]);
-					if (c != B) {
-						n += (1 << j);
-					}
-				}
-				int[] r = RANDOM[n];
-				int m = r[random.nextInt(r.length)];
-				temp = 3-m;
-				currentIndex += F[m];
-				sb.append(m);
-			}
-			
-			StringBuffer check = check(sb);
-			
-			System.out.println(sb.toString() + "," + valid(check.toString().replace(".", "")));
-			
-			list.add(sb);
-			if (list.size() > 10){
-				break;
-			}
-		}
-		
-		for (StringBuffer sb : list) {
-			System.out.println(sb.toString());
-		}
-		
-		return "";
-	}
+//	public String random() {
+//		Random random = new Random(map.hashCode());
+//		
+//		ArrayList<StringBuffer> list = new ArrayList<StringBuffer>();
+//
+//		int length = valid(map) / 2;
+//		System.out.println(length);
+//		while(true){
+//			StringBuffer sb = new StringBuffer("44");
+//			int currentIndex = startField(field);
+//			int temp = -1;
+//			for(int i = 0; i < length; i++){
+//				int n = 0;
+//				for (int j = 0; j < 4; j++) {
+//					if (temp == j) {
+//						continue;
+//					}
+//					char c = field.charAt(currentIndex + F[j]);
+//					if (c != B) {
+//						n += (1 << j);
+//					}
+//				}
+//				int[] r = RANDOM[n];
+//				int m = r[random.nextInt(r.length)];
+//				temp = 3-m;
+//				currentIndex += F[m];
+//				sb.append(m);
+//			}
+//			
+//			StringBuffer check = check(sb);
+//			
+//			System.out.println(sb.toString() + "," + valid(check.toString().replace(".", "")));
+//			
+//			list.add(sb);
+//			if (list.size() > 10){
+//				break;
+//			}
+//		}
+//		
+//		for (StringBuffer sb : list) {
+//			System.out.println(sb.toString());
+//		}
+//		
+//		return "";
+//	}
 	
 	public String search() {
 		Stack stack = new Stack();
-		stack.push(new StringBuffer("44"));
+		stack.push(new Step());
 
-		int limit = valid(map) + 2 + startIndex() % 2;
+		int valid = valid(map);
+		int limit = valid + 2 + startIndex() % 2;
 		int backupLimit = limit;
 		int count = 0;
 
@@ -190,18 +192,18 @@ public class Slide {
 			if (count % 1000 == 0) {
 				long end = System.currentTimeMillis();
 				if (timeout != 0 && start + timeout < end) {
-					return backupLimit + "," + stack.pop().length() + ","
+					return backupLimit + "," + stack.pop().index + ","
 							+ count + ",";
 				}
 			}
-			StringBuffer node = stack.pop();
+			Step node = stack.pop();
 			if (node == null) {
-				node = new StringBuffer("44");
+				node = new Step();
 				limit += 2;
 			}
 			for (int i = 0; i < 4; i++) {
-				StringBuffer step = new StringBuffer(node);
-				step.append(i);
+				Step step = node.copyInstance();
+				step.add(i);
 				
 				StringBuffer movedFiled = check(step);
 				if (movedFiled == null) {
@@ -217,7 +219,8 @@ public class Slide {
 				}
 				
 				// Œ»Ý‚Ì[‚³{‰ºŒÀ’l(LowerBound)„¡‰ñ‚Ì[‚³§ŒÀ
-				if (step.length() + valid(movedFiled.toString()) < limit) {
+				int valid2 = valid(movedFiled.toString());
+				if (step.index + valid2 < limit) {
 					stack.push(step);
 					count++;
 				}
@@ -226,35 +229,28 @@ public class Slide {
 		}
 	}
 
-	String format(StringBuffer step) {
+	String format(Step step) {
 		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < step.length(); i++) {
-			int c = step.charAt(i) - '0';
-			if (c == 4) {
-				continue;
-			}
-			sb.append(C[c]);
+		for (int i = 2; i < step.index; i++) {
+			sb.append(C[step.steps[i]]);
 		}
 		return sb.toString();
 	}
 
-	StringBuffer check(StringBuffer step) {
+	StringBuffer check(Step step) {
 		// –ß‚Á‚½‚çfalse
-		int a = step.charAt(step.length() - 1) - '0';
-		int b = step.charAt(step.length() - 2) - '0';
+		int a = step.steps[step.index - 1];
+		int b = step.steps[step.index - 2];
 		if (a + b == 3) {
 			return null;
 		}
-		
-		StringBuffer tempStep = new StringBuffer(step);
-		tempStep.delete(0, 2);
 		
 		StringBuffer tempField = new StringBuffer(field);
 		
 		int currentField = startField(getField());
 		int temp = currentField;
-		for (int i = 0; i < tempStep.length(); i++) {
-			currentField += F[tempStep.charAt(i) - '0'];
+		for (int i = 2; i < step.index; i++) {
+			currentField += F[step.steps[i]];
 
 			if (field.charAt(currentField) == B) {
 				return null;
@@ -325,18 +321,76 @@ public class Slide {
 		return map;
 	}
 
+	public static Step createStep(int[] init) {
+		return new Step(init);
+	}
+	
+	public static class Step {
+		int[] steps;
+		int index = -1;
+		
+		public Step() {
+			steps = new int[256];
+			Arrays.fill(steps, -1);
+			steps[0] = 4;
+			steps[1] = 4;
+			index  = 2;
+		}
+		
+		Step(int steps[], int index){
+			this.steps = steps;
+			this.index = index;
+		}
+		
+		public Step(int[] init) {
+			steps = new int[256];
+			Arrays.fill(steps, -1);
+			
+			System.arraycopy(init, 0, steps, 0, init.length);
+			
+			index = init.length;
+		}
+		
+		public void add(int i) {
+			steps[index] = i;
+			index++;
+		}
+		
+//		public int getIndex() {
+//			return index;
+//		}
+//		public void setIndex(int index) {
+//			this.index = index;
+//		}
+		
+		public Step copyInstance() {
+			int[] s = new int[steps.length];
+			System.arraycopy(steps, 0, s, 0, steps.length);
+			return new Step(s, index);
+		}
+		
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			for(int i = 0; steps[i] != -1;i++){
+				sb.append(steps[i]);
+			}
+			return sb.toString();
+		}
+	}
+	
 	class Stack {
-		ArrayList<StringBuffer> stack = new ArrayList<StringBuffer>();
-
-		public StringBuffer pop() {
+		ArrayList<Step> stack = new ArrayList<Step>();
+		
+		public Step pop() {
 			if (stack.size() == 0) {
 				return null;
 			}
 			return stack.remove(stack.size() - 1);
 		}
 
-		public void push(StringBuffer sb) {
-//			System.out.println(sb.toString());
+		public void push(Step sb) {
+//			System.out.println(sb);
 			stack.add(sb);
 		}
 
@@ -352,6 +406,7 @@ public class Slide {
 			char c = map.charAt(i);
 			if (c == B) {
 				b++;
+				continue;
 			}
 			int i2 = i - b;
 			
