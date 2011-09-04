@@ -17,12 +17,12 @@ public class Slide {
 	public int[] M;
 	public int[][] DD;
 	
-	private final String field;
-	private final String answer;
+	private final char[] field;
+	private final char[] answer;
 	
 	private final int width;
 	private final int height;
-	private final String map;
+	private final char[] map;
 
 	private final int timeout;
 
@@ -53,8 +53,11 @@ public class Slide {
 	public Slide(int width, int height, String map, int timeout) {
 		this.width = width;
 		this.height = height;
-		this.map = map;
 		this.timeout = timeout;
+		this.map = new char[map.length()];
+		for(int i = 0; i < map.length(); i++){
+			this.map[i] = map.charAt(i);
+		}
 		
 		this.field = initField(width, height, map);
 		this.answer = initAnswer(width, height, map);
@@ -82,53 +85,43 @@ public class Slide {
 		
 	}
 
-	String initAnswer(int width, int height, String map) {
-		StringBuffer sb = new StringBuffer();
-		// HEAD
-		for (int i = 0; i < (width + 2); i++)
-			sb.append(B);
+	char[] initAnswer(int width, int height, String map) {
+		char[] answer = new char[(width + 2) * (height + 2)];
+		Arrays.fill(answer, B);
+		
 		// BODY
 		for (int i = 0; i < height; i++) {
-			sb.append(B);
 			for (int j = 0; j < width; j++) {
 				int index = i * width + j + 1;
+				char c;
 				if (index == width * height) {
-					sb.append(0);
+					c = '0';
 				} else if (map.charAt(i*width + j) == '=') {
-					sb.append('=');
+					c = '=';
 				} else if (index > 9) {
-					sb.append((char)('A' + (index - 10)));
+					c = (char)('A' + (index - 10));
 				} else {
-					sb.append(index);
+					c = (char) (index + '0');
 				}
+				answer[(width + 2) * (i + 1) + (j + 1)] = c;
 			}
-			sb.append(B);
 		}
-		// FOOD
-		for (int i = 0; i < (width + 2); i++)
-			sb.append(B);
 
-		return sb.toString();
+		return answer;
 	}
 
-	String initField(int width, int height, String map) {
-		StringBuffer sb = new StringBuffer();
-		// HEAD
-		for (int i = 0; i < (width + 2); i++)
-			sb.append(B);
+	char[] initField(int width, int height, String map) {
+		char[] field = new char[(width + 2) * (height + 2)];
+		Arrays.fill(field, B);
+		
 		// BODY
 		for (int i = 0; i < height; i++) {
-			sb.append(B);
 			for (int j = 0; j < width; j++) {
-				sb.append(map.charAt(i*width + j));
+				field[(width + 2) * (i + 1) + (j + 1)] = map.charAt(i*width + j);
 			}
-			sb.append(B);
 		}
-		// FOOD
-		for (int i = 0; i < (width + 2); i++)
-			sb.append(B);
 
-		return sb.toString();
+		return field;
 	}
 	
 
@@ -205,13 +198,13 @@ public class Slide {
 				Step step = node.copyInstance();
 				step.add(i);
 				
-				StringBuffer movedFiled = check(step);
+				char[] movedFiled = check(step);
 				if (movedFiled == null) {
 					continue;
 				}
 				
 				// ³‰ðH
-				if (answer.equals(movedFiled.toString())) {
+				if (Arrays.equals(answer, movedFiled)) {
 					String format = format(step);
 					return backupLimit + "," + format.length() + "," + count
 							+ "," + format;
@@ -219,7 +212,7 @@ public class Slide {
 				}
 				
 				// Œ»Ý‚Ì[‚³{‰ºŒÀ’l(LowerBound)„¡‰ñ‚Ì[‚³§ŒÀ
-				int valid2 = valid(movedFiled.toString());
+				int valid2 = valid(movedFiled);
 				if (step.index + valid2 < limit) {
 					stack.push(step);
 					count++;
@@ -237,7 +230,7 @@ public class Slide {
 		return sb.toString();
 	}
 
-	StringBuffer check(Step step) {
+	char[] check(Step step) {
 		// –ß‚Á‚½‚çfalse
 		int a = step.steps[step.index - 1];
 		int b = step.steps[step.index - 2];
@@ -245,17 +238,17 @@ public class Slide {
 			return null;
 		}
 		
-		StringBuffer tempField = new StringBuffer(field);
+		char[] tempField = Arrays.copyOf(field, field.length);
 		
 		int currentField = startField(getField());
 		int temp = currentField;
 		for (int i = 2; i < step.index; i++) {
 			currentField += F[step.steps[i]];
 
-			if (field.charAt(currentField) == B) {
+			if (field[currentField] == B) {
 				return null;
 			}
-			if (field.charAt(currentField) == '=') {
+			if (field[currentField] == '=') {
 				return null;
 			}
 			swap(tempField, temp, currentField);
@@ -265,18 +258,23 @@ public class Slide {
 		return tempField;
 	}
 
-	static void swap(StringBuffer tempField, int a, int b) {
-		char temp = tempField.charAt(a);
-		tempField.setCharAt(a, tempField.charAt(b));
-		tempField.setCharAt(b, temp);
+	static void swap(char[] tempField, int a, int b) {
+		char temp = tempField[a];
+		tempField[a] = tempField[b];
+		tempField[b] = temp;
 	}
 
 	private int startIndex() {
-		return map.indexOf('0');
+		return startField(map);
 	}
 
-	private int startField(String field) {
-		return field.indexOf('0');
+	private int startField(char[] es) {
+		for(int i = 0; i < es.length; i++){
+			if (es[i] == '0'){
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	public static void main(String[] args) {
@@ -301,11 +299,11 @@ public class Slide {
 		}
 	}
 
-	public String getField() {
+	public char[] getField() {
 		return field;
 	}
 
-	public String getAnswer() {
+	public char[] getAnswer() {
 		return answer;
 	}
 	
@@ -317,7 +315,7 @@ public class Slide {
 		return height;
 	}
 
-	public String getMap() {
+	public char[] getMap() {
 		return map;
 	}
 
@@ -399,11 +397,11 @@ public class Slide {
 		}
 	}
 
-	public int valid(String map) {
+	public int valid(char[] movedFiled) {
 		int limit = 0;
 		int b = 0;
-		for (int i = 0; i < map.length(); i++) {
-			char c = map.charAt(i);
+		for (int i = 0; i < movedFiled.length; i++) {
+			char c = movedFiled[i];
 			if (c == B) {
 				b++;
 				continue;

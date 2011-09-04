@@ -118,33 +118,33 @@ public class SlideTest {
 	@Test
 	public void valid() {
 		Slide slide = new Slide(3,3,"123456708");
-		assertEquals(1, slide.valid("123456708"));
-		assertEquals(2, slide.valid("123456078"));
+		assertEquals(1, slide.valid(new char[]{'1','2','3','4','5','6','7','0','8'}));
+		assertEquals(2, slide.valid(new char[]{'1','2','3','4','5','6','0','7','8'}));
 
 		slide = new Slide(3,3,"12045=783");
-		assertEquals(4, slide.valid("12045=783"));
+		assertEquals(4, slide.valid(new char[]{'1','2','0','4','5','=','7','8','3'}));
 	}
 	
 	@Test
 	public void valid2() {
 		Slide slide = new Slide(3,3,"123456708");
-		assertEquals(1, slide.valid("....123..456..708...."));
-		assertEquals(2, slide.valid("....123..456..078...."));
+		assertEquals(1, slide.valid(new char[]{'.','.','.','.','1','2','3','.','.','4','5','6','.','.','7','0','8','.','.','.','.'}));
+		assertEquals(2, slide.valid(new char[]{'.','.','.','.','1','2','3','.','.','4','5','6','.','.','0','7','8','.','.','.','.'}));
 		
 		slide = new Slide(3,3,"12045=783");
-		assertEquals(4, slide.valid("....120..45=..783..."));
+		assertEquals(4, slide.valid(new char[]{'.','.','.','.','1','2','0','.','.','4','5','=','.','.','7','8','3','.','.','.'}));
 	}
 	
 	@Test
 	public void valid840251_63() {
 		Slide slide = new Slide(3,3,"840251=63");
 		// •—Dæ‚Ìê‡
-		assertEquals(14, slide.valid("840251=63"));
+		assertEquals(14, slide.valid(new char[]{'8','4','0','2','5','1','=','6','3'}));
 	}
 	
 	@Test
 	public void swap() {
-		StringBuffer sb = new StringBuffer("123");
+		char[] sb = new char[]{1,2,3};
 		Slide.swap(sb, 0, 2);
 	}
 	
