@@ -1,4 +1,4 @@
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -81,6 +81,62 @@ public class SlideTest {
 	}
 	
 	@Test
+	public void パターンB() {
+		Slide slide = new Slide(3, 3, "213465780");
+		
+		assertEquals("RULLDDRR", slide.search());
+	}
+	
+	@Test
+	public void パターンC() {
+		Slide slide = new Slide(3, 3, "132546780");
+		
+		assertEquals("6,18,702,LLURULDDRRULLURRDD", slide.search());
+	}
+	
+	@Test
+	public void ihara() {
+		Slide slide = new Slide(3, 3, "168452=30");
+		
+		assertEquals("12,16,148,LUURDDLUURDDLURD", slide.search());
+	}
+	
+	@Test
+	public void パターンD() {
+		Slide slide = new Slide(3, 3, "132465780");
+		
+		assertEquals("6,18,1322,ULULDDRRULDLUURRDD", slide.search());
+	}
+	
+	@Test
+	public void パターンたすきがけ() {
+		Slide slide = new Slide(3, 3, "165432780");
+		
+		assertEquals("10,14,109,LUURDLDRULURDD", slide.search());
+	}
+	
+	@Test
+	public void 上中段二回入れ替え3x3() {
+		Slide slide = new Slide(3, 3, "321654780");
+		
+		assertEquals("RULLDDRR", slide.search());
+	}
+	
+	@Test
+	public void 上段入れ替え3x3() {
+		Slide slide = new Slide(3, 3, "213546780");
+		
+		assertEquals("RULLDDRR", slide.search());
+	}
+	
+	@Test
+	public void 下段入れ替え3x3() {
+		Slide slide = new Slide(3, 3, "123546870");
+		
+		assertEquals("RULLDDRR", slide.search());
+	}
+	
+	@Test
 	public void search236105478() {
 		Slide slide = new Slide(3, 3, "236105478");
 		
@@ -91,7 +147,7 @@ public class SlideTest {
 	public void search840251_63() {
 		Slide slide = new Slide(3, 3, "840251=63");
 		
-		// �[���D��̏ꍇ
+		// �[���D��̏ꍇ
 		assertEquals("DLLURRDLLURRDDLUURDD", slide.search());
 	}
 	
@@ -111,7 +167,7 @@ public class SlideTest {
 	@Test
 	public void search21597084ACBF__36() {
 		Slide slide = new Slide(4, 4, "21597084ACBF==36", 120000);
-		// �[���D��̏ꍇ
+		// �[���D��̏ꍇ
 		assertEquals("29,46,9016015,LDRUURRDDLDRUULDLLURURDDDRUULDLUULDRDLURRRDLDR", slide.search());
 	}
 	
@@ -138,7 +194,7 @@ public class SlideTest {
 	@Test
 	public void valid840251_63() {
 		Slide slide = new Slide(3,3,"840251=63");
-		// ���D��̏ꍇ
+		// ���D��̏ꍇ
 		assertEquals(14, slide.valid(new char[]{'8','4','0','2','5','1','=','6','3'}));
 	}
 	
